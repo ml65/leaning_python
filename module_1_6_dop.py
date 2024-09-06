@@ -8,6 +8,6 @@ ptr = 0
 gratePointAverage = {}
 for name in sorted(students):
     gratePointAverage[name]=sum(grades[ptr])/len(grades[ptr])
-    ptr = ptr + 1
+    ptr+=1
 
 print (gratePointAverage)
