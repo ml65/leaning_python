@@ -6,6 +6,7 @@ while i < len(my_list) and my_list[i] >= 0:
     if 0 < my_list[i]:
         print (my_list[i])
     i += 1
+    
 # Вариант с использованием операторов break и continue
 print ("v2.0")
 i = 0
