@@ -15,32 +15,14 @@ def is_contains(str, list):
     count_calls()
     res = False
     for item in list:
-        if str == item:
+        if str.lower() == item.lower():
             res = True
             break
     return res
 
-tuple = string_info("О сколько нам открытий чудных")
-print (tuple)
-tuple = string_info("Готовит просвещенья дух")
-print (tuple)
-tuple = string_info("И опыт - сын ошибок трудных")
-print (tuple)
-tuple = string_info("И гений")
-print (tuple)
-
-list = ["О", "сколько", "нам", 3, 66, False]
-
-param = "сколько"
-if ( is_contains(param, list)):
-    print (param, "содержится")
-else:
-    print (param, "не содержится")
-
-param = 66
-if ( is_contains(param, list)):
-    print (param, "содержится")
-else:
-    print (param, "не содержится")
-
-print ("Число вызовов методов:", calls)
+print (string_info("О сколько нам открытий чудных"))
+print (string_info("Готовит просвещенья дух"))
+print (string_info("И опыт - сын ошибок трудных"))
+print ( is_contains("СКОЛЬКО", ["О","сколько","нам","открытий"]))
+print ( is_contains("открытых", ["О","сколько","нам","открытий"]))
+print (calls)
