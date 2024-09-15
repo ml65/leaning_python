@@ -6,7 +6,7 @@ from attr.validators import instance_of
 
 def calculate_structure_sum(obj):
     '''
-    Функция подсчета числе и строк в сложной структуре
+    Функция подсчета числе и строк в сложной структуреm
     :param obj:
     :return: int:
     '''
