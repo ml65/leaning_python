@@ -1,11 +1,6 @@
 # Дополнительное практическое задание по модулю*
+
 import time
-from re import search
-
-from oauthlib.oauth2.rfc6749.parameters import parse_token_response
-from pyatspi import findAllDescendants
-
-from module_3_5 import result
 
 
 #Задание "Свой YouTube":
