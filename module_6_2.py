@@ -11,26 +11,25 @@ from colorama import Style
 class Vehicle:
 
     owner:str
-    _model:str
-    _engine_power:int
-    _color:str
+    __model:str
+    __engine_power:int
+    __color:str
     __COLOR_VARIANTS = ['blue', 'red', 'green', 'black', 'white']
 
     def __init__ (self, owner, model, color, engine_power):
         self.owner = owner
-        self._model = model
-        self._color = color
-        self._engine_power = engine_power
-        self.__COLOR_VARIANTS = [x.lower() for x in self.__COLOR_VARIANTS]
+        self.__model = model
+        self.__color = color
+        self.__engine_power = engine_power
 
     def get_model(self):
-        return f" Модель: {self._model}"
+        return f" Модель: {self.__model}"
 
     def get_horsepower(self):
-        return f"Мощность двигателя: {self._engine_power}"
+        return f"Мощность двигателя: {self.__engine_power}"
 
     def get_color(self):
-        return "Цвет: " + Fore.GREEN + f"{self._color}" + Fore.RESET
+        return "Цвет: " + Fore.GREEN + f"{self.__color}" + Fore.RESET
 
     def print_info(self):
         print(self.get_model())
@@ -40,7 +39,7 @@ class Vehicle:
 
     def set_color(self, newcolor:str):
         if newcolor.lower() in self.__COLOR_VARIANTS:
-            self._color = newcolor
+            self.__color = newcolor
 
         else:
             print(Fore.RED + f"Нельзя сменить цвет на {newcolor}" + Fore.RESET)
