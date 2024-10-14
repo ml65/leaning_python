@@ -1,0 +1,4 @@
+Может быть Text for tell.
+Используйте кодировку - utf-8 для теКста.
+Because there are 2 languages text and TEXT !
+Спасибо!
