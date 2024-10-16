@@ -29,7 +29,7 @@ class WordsFinder:
         result = {}
         for file, words  in self.all_words.items():
             if word.lower() in words:
-                result[file] = words.index(word.lower())
+                result[file] = words.index(word.lower()) + 1
         return result
 
     def count(self, word):
