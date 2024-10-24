@@ -44,9 +44,9 @@ def get_advanced_writer(file_name):
     return write_everithing
 
 print("\n================================\nЗамыкание:")
-write = get_advanced_writer('example.txt')
+write = get_advanced_writer('../example.txt')
 write('Это строчка', ['А', 'это', 'уже', 'число', 5, 'в', 'списке'])
-file = open('example.txt','r')
+file = open('../example.txt', 'r')
 for str in file:
     print(str, end = '')
 
