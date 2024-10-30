@@ -6,9 +6,7 @@ def all_variants(text):
     for width in range(1,len(text)+1):
         begin = 0
         while (begin + width <= len(text)):
-            resp = ''
-            for j in range(begin, begin + width):
-                resp += text[j]
+            resp = text[begin:begin + width]
             begin += 1
             yield resp
 
