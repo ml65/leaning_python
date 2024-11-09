@@ -35,19 +35,22 @@ for name in filenames:
     read_info(name)
 '''
 # Многопроцессный
-print("Многопроцессорный вызов")
-i = 0
-processes = []
-for name in filenames:
-    print(f"Читаем файл {name}")
-    process = multiprocessing.Process(target=read_info, args=(name,))
-    process.start()
-    processes.append(process)
 
-for process in processes:
-    process.join()
+if __name__ == '__main__':
+    print("Многопроцессорный вызов")
+    i = 0
+    processes = []
+    for name in filenames:
+        print(f"Читаем файл {name}")
+        process = multiprocessing.Process(target=read_info, args=(name,))
+        process.start()
+        processes.append(process)
+
+    for process in processes:
+        process.join()
 
 
-end_time = time.time()
-delta = end_time - start_time
-print(f"Время выполнения {delta}")
+    end_time = time.time()
+    delta = end_time - start_time
+    print(f"Время выполнения {delta}")
+    
