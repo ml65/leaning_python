@@ -21,10 +21,11 @@ def read_info(name):
     '''
     # вариант с использованием readlines
     # Время выполнения 2.339155435562134
+    print("=read=",name)
     with open(name,"r") as file:
         all_data = file.readlines()
 
-filenames = [f'./file {number}.txt' for number in range(1, 5)]
+filenames = [f'./file {number}.txt' for number in range(1, 6)]
 start_time = time.time()
 # Линейный вызов
 # Время выполнения 4.865707159042358
@@ -38,17 +39,8 @@ for name in filenames:
 
 if __name__ == '__main__':
     print("Многопроцессорный вызов")
-    i = 0
-    processes = []
-    for name in filenames:
-        print(f"Читаем файл {name}")
-        process = multiprocessing.Process(target=read_info, args=(name,))
-        process.start()
-        processes.append(process)
-
-    for process in processes:
-        process.join()
-
+    with multiprocessing.Pool(multiprocessing.cpu_count() * 3) as pool:
+        pool.map(read_info, filenames)
 
     end_time = time.time()
     delta = end_time - start_time
