@@ -9,7 +9,7 @@ class RunnerTest(unittest.TestCase):
     @unittest.skipIf(is_frozen,"Тесты в этом кейсе заморожены.")
     def test_negativ1_walk(self):
         failed = False
-        name = "aaa"
+        name = 3
         try:
             runner = Runner(name)
             logging.info("Отрицательный тест 1 провален!")
@@ -21,9 +21,17 @@ class RunnerTest(unittest.TestCase):
 
     @unittest.skipIf(is_frozen,"Тесты в этом кейсе заморожены.")
     def test_negativ2_walk(self):
-        with self.assertRaises(ValueError):
-            runner = Runner("test", -5)
+        failed = False
+        name = "test"
+        speed = -5
+        try:
+            runner = Runner(name, speed)
+            logging.info("Отрицательный тест 1 провален!")
+            failed = True
+        except ValueError:
             logging.info("Негативный тест(2) на создание Runner выполнен успешно.")
+        if (failed):
+            raise TypeError(f'Негативный тест должен вызывать исключение!')
 
     @unittest.skipIf(is_frozen,"Тесты в этом кейсе заморожены.")
     def test_walk(self):
