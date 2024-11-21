@@ -28,11 +28,10 @@ api = os.environ.get('API_KEY')
 bot = Bot(token = api)
 dp = Dispatcher(bot, storage = MemoryStorage())
 
-kb = ReplyKeyboardMarkup()
+kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
 button = KeyboardButton( text = "Рассчитать" )
 button2 = KeyboardButton( text = "Информация" )
-kb.add(button)
-kb.add(button2)
+kb.add(button, button2)
 
 @dp.message_handler(commands=['start'])
 async def start_message(message):
