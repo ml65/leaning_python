@@ -1,15 +1,13 @@
-# Домашнее задание по теме "Клавиатура кнопок".
+# Домашнее задание по теме "Инлайн клавиатуры".
 
-# Задача "Меньше текста, больше кликов":
- 
+# Задача "Ещё больше выбора":
+
 import os
 import aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import  MemoryStorage
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.dispatcher.filters.state import State, StatesGroup
-import asyncio
 from dotenv import load_dotenv
 
 class UserState(StatesGroup):
@@ -31,17 +29,31 @@ button = KeyboardButton( text = "Рассчитать" )
 button2 = KeyboardButton( text = "Информация" )
 kb.add(button, button2)
 
+inline_kb = InlineKeyboardMarkup(resize_keyboard=True )
+button3 = InlineKeyboardButton(text="Рассчитать норму калорий", callback_data='calories')
+button4 = InlineKeyboardButton(text="Формулы расчёта", callback_data='formulas')
+inline_kb.add(button3, button4)
+
+@dp.message_handler(text="Рассчитать")
+async def main_menu(message):
+    await message.answer("Выберите опцию:", reply_markup=inline_kb )
+    await message.answer()
+
 @dp.message_handler(commands=['start'])
 async def start_message(message):
     await message.answer("Привет! Я бот помогающий твоему здоровью.", reply_markup=kb )
 
-@dp.message_handler(text = "Информация")
+@dp.callback_query_handler(text='formulas')
+async def get_formulas(call):
+    await call.message.answer("1. Упрощенный вариант формулы Миффлина-Сан Жеора:\n\nдля мужчин: 10 х вес (кг) + 6,25 x рост (см) – 5 х возраст (г) + 5;")
+
+@dp.message_handler(text = 'Информация')
 async def set_age(message):
     await message.answer("Информация о боте:")
 
-@dp.message_handler(text = "Рассчитать")
-async def set_age(message):
-    await message.answer("Введите свой возраст:")
+@dp.callback_query_handler(text = 'calories')
+async def set_age(call):
+    await call.message.answer("Введите свой возраст:")
     await UserState.age.set()
 
 @dp.message_handler(state = UserState.age)
