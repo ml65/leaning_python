@@ -1,17 +1,16 @@
-# Домашнее задание по теме "План написания админ панели"
+# Домашнее задание по теме "Доработка бота"
 
-# Задача "Продуктовая база":
+# Задача "Витамины для всех!":
 
 import os
 import aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import  MemoryStorage
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher.filters.state import State, StatesGroup, default_state
 from dotenv import load_dotenv
-
-from crud_function import Product
-
 
 class UserState(StatesGroup):
     age = State()
@@ -26,7 +25,7 @@ api = os.environ.get('API_KEY')
 
 bot = Bot(token = api)
 dp = Dispatcher(bot, storage = MemoryStorage())
-product = Product()
+dp.middleware.setup(LoggingMiddleware())
 
 kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
 button1_1 = KeyboardButton( text = "Рассчитать" )
@@ -40,26 +39,41 @@ button2_1 = InlineKeyboardButton(text="Рассчитать норму кало�
 button2_2 = InlineKeyboardButton(text="Формулы расчёта", callback_data='formulas')
 inline_kb.add(button2_1, button2_2)
 
-inline_kb2 = InlineKeyboardMarkup(resize_keyboard=True)
-for prod in product.get_all_product():
-    id,name,description, price,photo = prod
-    inline_kb2.add(InlineKeyboardButton(text=name, callback_data='product_buying'))
+PRODUCTS = [
+    "Product1",
+    "Product2",
+    "Product3",
+    "Product4",
+]
 
-@dp.callback_query_handler(text="product_buying")
-async def send_confirm_message(call):
-    await call.message.answer("Вы успешно приобрели продукт!")
+def create_inline_keyboard():
+    keyboard = InlineKeyboardMarkup()
+    for product in PRODUCTS:
+        keyboard.add(InlineKeyboardButton(product, callback_data=f"product_buying_{product.lower()}"))
+    return keyboard
+
+@dp.callback_query_handler(lambda message: True, state=None)
+async def process_callback_data(call , state):
+    callback_data = call.data
+    if callback_data.startswith("product_buying_"):
+        selected_product = callback_data.split("_")[2]
+        await call.message.answer(f"Вы успешно приобрели продукт: {selected_product}")
+        await state.update_data({"selected_product": selected_product})
+    elif callback_data.startswith("calories"):
+        await call.message.answer("Введите свой возраст:")
+        await UserState.age.set()
+    else:
+        await call.answer("Некорректный выбор. Попробуйте еще раз.")
 
 
 @dp.message_handler(text="Купить")
 async def get_buying_list(message):
-
-    for prod in product.get_all_product():
-        id, name, description, price, photo = prod
-        info = f"Название: {name} | Описание: {description} | Цена: {price}"
+    for i in range(1,5):
+        info = f"Название: Product{i} | Описание: описание {i} | Цена: {i*100}"
         await message.answer(info)
-        with open(photo, "rb") as img:
+        with open('imgs/product_' + str(i) +'.png', "rb") as img:
             await message.answer_photo(img)
-    await message.answer("Выберите продукт для покупки:", reply_markup=inline_kb2)
+    await message.answer("Выберите продукт для покупки:", reply_markup=create_inline_keyboard())
 
 @dp.message_handler(text="Рассчитать")
 async def main_menu(message):
@@ -76,11 +90,6 @@ async def get_formulas(call):
 @dp.message_handler(text = 'Информация')
 async def set_age(message):
     await message.answer("Информация о боте:")
-
-@dp.callback_query_handler(text = 'calories')
-async def set_age(call):
-    await call.message.answer("Введите свой возраст:")
-    await UserState.age.set()
 
 @dp.message_handler(state = UserState.age)
 async def set_growth(message, state):
@@ -99,6 +108,7 @@ async def send_calories(message, state):
     await state.update_data(weight = message.text)
     data = await state.get_data()
     await message.answer(callories_calculate(data))
+    await UserState.next()
 
 def callories_calculate(data):
     if not isint(data['age'] or not isint(data['growth']) or not isint(data['weight'])):
@@ -107,6 +117,7 @@ def callories_calculate(data):
         age    = int(data['age'])
         growth = int(data['growth'])
         weight = int(data['weight'])
+
         return f"Ваша норма калорий {10 * weight + 6.25 * growth - 5 * age + 5}"
 
 def isint(s):
