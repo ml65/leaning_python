@@ -6,6 +6,8 @@ import os
 import aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import  MemoryStorage
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher.filters.state import State, StatesGroup, default_state
 from dotenv import load_dotenv
@@ -23,6 +25,7 @@ api = os.environ.get('API_KEY')
 
 bot = Bot(token = api)
 dp = Dispatcher(bot, storage = MemoryStorage())
+dp.middleware.setup(LoggingMiddleware())
 
 kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
 button1_1 = KeyboardButton( text = "Рассчитать" )
@@ -36,27 +39,38 @@ button2_1 = InlineKeyboardButton(text="Рассчитать норму кало�
 button2_2 = InlineKeyboardButton(text="Формулы расчёта", callback_data='formulas')
 inline_kb.add(button2_1, button2_2)
 
-inline_kb2 = InlineKeyboardMarkup(resize_keyboard=True)
-button3_1 = InlineKeyboardButton(text="Product1", callback_data='product_buying')
-button3_2 = InlineKeyboardButton(text="Product2", callback_data='product_buying')
-button3_3 = InlineKeyboardButton(text="Product3", callback_data='product_buying')
-button3_4 = InlineKeyboardButton(text="Product4", callback_data='product_buying')
-inline_kb2.add(button3_1, button3_2, button3_3, button3_4)
+PRODUCTS = [
+    "Product1",
+    "Product2",
+    "Product3",
+    "Product4",
+]
 
-@dp.callback_query_handler(text="product_buying")
-async def send_confirm_message(call):
-    await call.message.answer("Вы успешно приобрели продукт!")
+def create_inline_keyboard():
+    keyboard = InlineKeyboardMarkup()
+    for product in PRODUCTS:
+        keyboard.add(InlineKeyboardButton(product, callback_data=f"product_buying_{product.lower()}"))
+    return keyboard
+
+@dp.callback_query_handler(lambda message: True, state=None)
+async def process_callback_data(callback , state):
+    callback_data = callback.data
+    if callback_data.startswith("product_buying_"):
+        selected_product = callback_data.split("_")[2]
+        await callback.message.answer(f"Вы успешно приобрели продукт: {selected_product}")
+        await state.update_data({"selected_product": selected_product})
+    else:
+        await callback.answer("Некорректный выбор. Попробуйте еще раз.")
 
 
 @dp.message_handler(text="Купить")
 async def get_buying_list(message):
     for i in range(1,5):
-        print("=1=",i)
         info = f"Название: Product{i} | Описание: описание {i} | Цена: {i*100}"
         await message.answer(info)
         with open('imgs/product_' + str(i) +'.png', "rb") as img:
             await message.answer_photo(img)
-    await message.answer("Выберите продукт для покупки:", reply_markup=inline_kb2)
+    await message.answer("Выберите продукт для покупки:", reply_markup=create_inline_keyboard())
 
 @dp.message_handler(text="Рассчитать")
 async def main_menu(message):
