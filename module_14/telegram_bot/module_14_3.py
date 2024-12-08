@@ -53,14 +53,17 @@ def create_inline_keyboard():
     return keyboard
 
 @dp.callback_query_handler(lambda message: True, state=None)
-async def process_callback_data(callback , state):
-    callback_data = callback.data
+async def process_callback_data(call , state):
+    callback_data = call.data
     if callback_data.startswith("product_buying_"):
         selected_product = callback_data.split("_")[2]
-        await callback.message.answer(f"Вы успешно приобрели продукт: {selected_product}")
+        await call.message.answer(f"Вы успешно приобрели продукт: {selected_product}")
         await state.update_data({"selected_product": selected_product})
+    elif callback_data.startswith("calories"):
+        await call.message.answer("Введите свой возраст:")
+        await UserState.age.set()
     else:
-        await callback.answer("Некорректный выбор. Попробуйте еще раз.")
+        await call.answer("Некорректный выбор. Попробуйте еще раз.")
 
 
 @dp.message_handler(text="Купить")
@@ -88,11 +91,6 @@ async def get_formulas(call):
 async def set_age(message):
     await message.answer("Информация о боте:")
 
-@dp.callback_query_handler(text = 'calories')
-async def set_age(call):
-    await call.message.answer("Введите свой возраст:")
-    await UserState.age.set()
-
 @dp.message_handler(state = UserState.age)
 async def set_growth(message, state):
     await state.update_data(age = message.text)
@@ -110,6 +108,7 @@ async def send_calories(message, state):
     await state.update_data(weight = message.text)
     data = await state.get_data()
     await message.answer(callories_calculate(data))
+    await UserState.next()
 
 def callories_calculate(data):
     if not isint(data['age'] or not isint(data['growth']) or not isint(data['weight'])):
@@ -118,6 +117,7 @@ def callories_calculate(data):
         age    = int(data['age'])
         growth = int(data['growth'])
         weight = int(data['weight'])
+
         return f"Ваша норма калорий {10 * weight + 6.25 * growth - 5 * age + 5}"
 
 def isint(s):
