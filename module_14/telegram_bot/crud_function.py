@@ -8,6 +8,7 @@ class Product:
     '''
     CRUD Product - модель продуктов
     '''
+
     def __init__(self):
         if not os.path.isfile("not_telegram.db"):
             Path("not_telegram.db").touch()
@@ -40,4 +41,43 @@ class Product:
     def get_all_product(self):
         self.cursor.execute("SELECT * FROM Products")
         return self.cursor.fetchall()
+
+class User:
+    '''
+    CRUD User - модель пользователей
+    '''
+
+    DEFAULT_BALANCE = 1000
+
+    def __init__(self):
+        if not os.path.isfile("not_telegram.db"):
+            Path("not_telegram.db").touch()
+        self.connection = sqlite3.connect("not_telegram.db")
+        self.cursor = self.connection.cursor()
+        self.cursor.execute('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\'Users\'')
+        istable = self.cursor.fetchall()
+        if (len(istable) == 0):
+            self.initiate_db()
+
+    def initiate_db(self):
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Users(
+        id INTEGER PRIMARY KEY,
+        username TEXT NOT NULL,
+        email TEXT NOT NULL,
+        age INTEGER NOT NULL,
+        balance INTEGER NOT NULL
+        )     
+        ''')
+
+    def add_user(self,username, email, age):
+        self.cursor.execute("INSERT INTO Users(username, email, age, balance) VALUES (?, ?, ?, ?)",
+                            (username, email, age, self.DEFAULT_BALANCE))
+        self.connection.commit()
+
+    def is_included(self, username):
+        self.cursor.execute("SELECT * FROM Users WHERE username = ?", (username,))
+        return self.cursor.fetchone()
+
+
 

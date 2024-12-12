@@ -1,9 +1,10 @@
-# Домашнее задание по теме "Доработка бота"
+# Домашнее задание по теме "Написание примитивной ORM"
 
-# Задача "Витамины для всех!":
+# Задача "Регистрация покупателей":
 
 import os
 import aiogram
+from crud_function import User
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import  MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -17,6 +18,12 @@ class UserState(StatesGroup):
     growth = State()
     weight = State()
 
+class RegistrationState(StatesGroup):
+    username = State()
+    email = State()
+    age = State()
+    balance = 1000
+
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
@@ -26,13 +33,15 @@ api = os.environ.get('API_KEY')
 bot = Bot(token = api)
 dp = Dispatcher(bot, storage = MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
+user_crud = User()
 
 kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
 button1_1 = KeyboardButton( text = "Рассчитать" )
 button1_2 = KeyboardButton( text = "Информация" )
 button1_3 = KeyboardButton( text = "Купить" )
+button1_4 = KeyboardButton( text = "Регистрация" )
 
-kb.add(button1_1, button1_2, button1_3)
+kb.add(button1_1, button1_2, button1_3, button1_4)
 
 inline_kb = InlineKeyboardMarkup(resize_keyboard=True )
 button2_1 = InlineKeyboardButton(text="Рассчитать норму калорий", callback_data='calories')
@@ -127,7 +136,34 @@ def isint(s):
     except ValueError:
         return False
 
+# Регистрация пользователя
+@dp.message_handler(text="Регистрация")
+async def sing_up(message):
+    await message.answer("Введите имя пользователя (только латинский алфавит):")
+    await RegistrationState.username.set()
 
+@dp.message_handler(state = RegistrationState.username)
+async def set_username(message, state):
+    if user_crud.is_included(message.text):
+        await message.answer("Пользователь существует, введите другое имя")
+        await RegistrationState.username.set()
+    else:
+        await state.update_data(username = message.text)
+        await message.answer("Введите свой email:")
+        await RegistrationState.email.set()
+
+@dp.message_handler(state = RegistrationState.email)
+async def set_email(message, state):
+    await state.update_data(email = message.text)
+    await message.answer("Введите свой возраст:")
+    await RegistrationState.age.set()
+
+@dp.message_handler(state = RegistrationState.age)
+async def set_age(message, state):
+    await state.update_data(age = message.text)
+    data = await state.get_data()
+    user_crud.add_user(data['username'], data['email'], data['age'])
+    await RegistrationState.next()
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
 
