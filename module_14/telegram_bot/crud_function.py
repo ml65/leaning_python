@@ -71,11 +71,13 @@ class User:
         ''')
 
     def add_user(self,username, email, age):
+        # TODO! валидация данных, защита от инъекций
         self.cursor.execute("INSERT INTO Users(username, email, age, balance) VALUES (?, ?, ?, ?)",
                             (username, email, age, self.DEFAULT_BALANCE))
         self.connection.commit()
 
     def is_included(self, username):
+        # TODO! валидация данных - защита от инъекций
         self.cursor.execute("SELECT * FROM Users WHERE username = ?", (username,))
         return self.cursor.fetchone()
 

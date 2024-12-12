@@ -154,16 +154,20 @@ async def set_username(message, state):
 
 @dp.message_handler(state = RegistrationState.email)
 async def set_email(message, state):
+    # TODO! валидация email
     await state.update_data(email = message.text)
     await message.answer("Введите свой возраст:")
     await RegistrationState.age.set()
 
 @dp.message_handler(state = RegistrationState.age)
 async def set_age(message, state):
+    # TODO! валидация возраста
     await state.update_data(age = message.text)
     data = await state.get_data()
+    # TODO! отработка исключений
     user_crud.add_user(data['username'], data['email'], data['age'])
     await RegistrationState.next()
+
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
 
